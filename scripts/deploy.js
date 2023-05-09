@@ -8,8 +8,8 @@ async function main() {
   const rate = 1000;
   const softCap = hre.ethers.utils.parseEther("0.1");
   const hardCap = hre.ethers.utils.parseEther("1");
-  const startTime = Math.floor(Date.now() / 1000); // Start in 1 minute
-  const endTime = Math.floor(Date.now() / 1000) + 86400; // End in 1 day
+  const startTime = Math.floor(new Date("2023-05-08") / 1000); // Start in 1 minute
+  const endTime = Math.floor(new Date("2023-05-10") / 1000); // End in 1 day
 
   const ICO = await hre.ethers.getContractFactory("ICO");
   const ico = await ICO.deploy(

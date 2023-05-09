@@ -67,7 +67,7 @@ const CountdownTimer = () => {
 				<Progress
 					type="circle"
 					status="active"
-					percent={100 - progressBarValue}
+					percent={progressBarValue.toFixed(3)}
 					strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
 				/>
 			</Col>

@@ -19,7 +19,7 @@ function App() {
 	const [softCap, setSoftCap] = useState(0);
 	const [hardCap, setHardCap] = useState(0);
 
-	const contractAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+	const contractAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
 	const abi = ICO.abi;
 
 	const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");

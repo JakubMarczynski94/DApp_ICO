@@ -14,20 +14,17 @@ const App = () => {
 		depositAmount
 	} = useContext(GlobalContext);
 
-	const fetchsoft = async () => {
+	const fetchcap = async () => {
 		const softCap = await contract.methods.softCap().call();
+		console.log(softCap);
 		setSoftCap(softCap);
-	};
-
-	const fetchhard = async () => {
 		const hardCap = await contract.methods.hardCap().call();
 		setHardCap(hardCap);
 		console.log(hardCap);
 	};
 
 	useEffect(() => {
-		fetchsoft();
-		fetchhard();
+		fetchcap();
 	}, []);
 
 	return (
@@ -42,7 +39,14 @@ const App = () => {
 							<Progress
 								percent={(depositAmount / hardCap) * 100}
 								status="active"
-								strokeColor={{ from: "#108ee9", to: "#87d068" }}
+								success={{
+									percent: hardCap
+										? (Math.min(softCap, depositAmount) /
+												hardCap) *
+										  100
+										: 100
+								}}
+								// strokeColor={{ from: "#108ee9", to: "#87d068" }}
 							/>
 						</Paragraph>
 					</Typography>

@@ -49,11 +49,12 @@ const MyHeader = () => {
 				}}
 			>
 				<Avatar
-					icon={<UserOutlined />}
+					src={
+						"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0FkTcjO3TpjKLOFu04gxmm-XcnY8lBfvuRPkN2UcOMg&s"
+					}
 					size="large"
 					style={{ marginRight: "8px" }}
 				/>
-				<span>My App</span>
 			</div>
 			{account ? (
 				// `${account.address.substring(
