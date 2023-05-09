@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+import "hardhat/console.sol";
+
 contract ICO is ERC20, Ownable {
     uint256 public minPurchase;
     uint256 public maxPurchase;
@@ -42,6 +44,7 @@ contract ICO is ERC20, Ownable {
         require(block.timestamp <= endTime, "ICO has ended");
 
         uint256 amount = msg.value * rate;
+        console.log("deposit amount %s.", amount);
         require(amount >= minPurchase, "Amount is below minimum purchase limit");
         require(amount <= maxPurchase, "Amount is above maximum purchase limit");
 

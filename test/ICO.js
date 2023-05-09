@@ -57,11 +57,14 @@ describe("ICO Contract", function () {
     });
 
     it("Should revert if the amount is below the minimum purchase limit", async function () {
-      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("0.05") })).to.be.revertedWith("Amount is below minimum purchase limit");
+      await ethers.provider.send("evm_increaseTime", [120]);
+      await ethers.provider.send("evm_mine");
+
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("0.00005") })).to.be.revertedWith("Amount is below minimum purchase limit");
     });
 
     it("Should revert if the amount is above the maximum purchase limit", async function () {
-      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("20") })).to.be.revertedWith("Amount is above maximum purchase limit");
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("0.00005") })).to.be.revertedWith("Amount is above maximum purchase limit");
     });
 
     it("Should mint tokens to the sender if all conditions are met", async function () {
