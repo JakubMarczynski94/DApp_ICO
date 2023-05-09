@@ -1,133 +1,154 @@
-// Import required modules
+// Test file for ICO contract
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("ICO", function () {
-  let ico;
-  let owner;
-  let addr1;
+describe("ICO Contract", function () {
+  let ICO;
+  let token;
 
-  // Deploy the contract before each test
+  // Deploy a new contract instance before each test case
   beforeEach(async function () {
-    [owner, addr1] = await ethers.getSigners();
-
-    const ICO = await ethers.getContractFactory("ICO");
-    ico = await ICO.deploy(
+    ICO = await ethers.getContractFactory("ICO");
+    token = await ICO.deploy(
       "My Token",
       "MTK",
-      ethers.utils.parseEther("0.1"), // minPurchase
-      ethers.utils.parseEther("10"), // maxPurchase
-      1000, // rate
-      ethers.utils.parseEther("100"), // softCap
-      ethers.utils.parseEther("1000"), // hardCap
-      Math.floor(Date.now() / 1000) + 60 * 60, // start time (1 hour from now)
-      Math.floor(Date.now() / 1000) + 24 * 60 * 60 // end time (24 hours from now)
+      ethers.utils.parseEther("0.1"), // Minimum purchase of 0.1 ether
+      ethers.utils.parseEther("10"), // Maximum purchase of 10 ether
+      1000, // Rate of 1000 tokens per ether
+      ethers.utils.parseEther("100"), // Soft cap of 100 ether
+      ethers.utils.parseEther("1000"), // Hard cap of 1000 ether
+      Math.floor(Date.now() / 1000) + 60, // Start time in 60 seconds from now
+      Math.floor(Date.now() / 1000) + 3600 // End time in 1 hour from now
     );
-
-    await ico.deployed();
   });
 
-  it("should have correct initial values", async function () {
-    expect(await ico.name()).to.equal("My Token");
-    expect(await ico.symbol()).to.equal("MTK");
-    expect(await ico.minPurchase()).to.equal(ethers.utils.parseEther("0.1"));
-    expect(await ico.maxPurchase()).to.equal(ethers.utils.parseEther("10"));
-    expect(await ico.rate()).to.equal(1000);
-    expect(await ico.softCap()).to.equal(ethers.utils.parseEther("100"));
-    expect(await ico.hardCap()).to.equal(ethers.utils.parseEther("1000"));
-    expect(await ico.startTime()).to.be.above(Math.floor(Date.now() / 1000) - 1);
-    expect(await ico.endTime()).to.be.above(Math.floor(Date.now() / 1000) + 59);
-    expect(await ico.active()).to.equal(true);
-  });
-
-  it("should allow deposits during ICO", async function () {
-    const purchaseAmount = ethers.utils.parseEther("0.5");
-    await expect(() => owner.sendTransaction({ to: ico.address, value: purchaseAmount }))
-      .to.changeTokenBalance(ico, purchaseAmount.mul(1000));
-
-    expect(await ico.balanceOf(owner.address)).to.equal(purchaseAmount.mul(1000));
-  });
-
-  it("should not allow deposits before ICO starts", async function () {
-    await expect(addr1.sendTransaction({ to: ico.address, value: ethers.utils.parseEther("1") }))
-      .to.be.revertedWith("ICO has not started yet");
-  });
-
-  it("should not allow deposits after ICO ends", async function () {
-    await ethers.provider.send("evm_setNextBlockTimestamp", [await ico.endTime()]);
-    await expect(owner.sendTransaction({ to: ico.address, value: ethers.utils.parseEther("1") }))
-      .to.be.revertedWith("ICO has ended");
-  });
-
-  it("should not allow deposits below minimum purchase", async function () {
-    await expect(owner.sendTransaction({ to: ico.address, value: ethers.utils.parseEther("0.05") }))
-      .to.be.revertedWith("Amount is below minimum purchase limit");
-  });
-
-  it("should not allow deposits above maximum purchase", async function () {
-    await expect(owner.sendTransaction({ to: ico.address, value: ethers.utils.parseEther("11") }))
-      .to.be.revertedWith("Amount is above maximum purchase limit");
-  });
-
-  it("should allow owner to stop ICO", async function () {
-    await ico.stopICO();
-    expect(await ico.active()).to.equal(false);
-  });
-
-  it("should not allow non-owner to stop ICO", async function () {
-    await expect(ico.connect(addr1).stopICO()).to.be.revertedWith("Ownable: caller is not the owner");
-  });
-
-  it("should not allow withdrawals while ICO is active", async function () {
-    await expect(ico.withdraw()).to.be.revertedWith("Cannot withdraw while ICO is active");
-  });
-
-  it("should not allow withdrawal if soft cap is not reached", async function () {
-    await expect(ico.connect(addr1).claim()).to.be.revertedWith("Soft cap not reached");
-  });
-
-  it("should not allow claiming if user has no tokens", async function () {
-    await expect(ico.claim()).to.be.revertedWith("No tokens to claim");
-  });
-
-  it("should allow users to claim after ICO ends", async function () {
-    const purchaseAmount = ethers.utils.parseEther("0.5");
-    await owner.sendTransaction({ to: ico.address,
-    value: purchaseAmount
+  describe("Deployment", function () {
+    it("Should set the correct initial values", async function () {
+      expect(await token.name()).to.equal("My Token");
+      expect(await token.symbol()).to.equal("MTK");
+      expect(await token.minPurchase()).to.equal(ethers.utils.parseEther("0.1"));
+      expect(await token.maxPurchase()).to.equal(ethers.utils.parseEther("10"));
+      expect(await token.rate()).to.equal(1000);
+      expect(await token.softCap()).to.equal(ethers.utils.parseEther("100"));
+      expect(await token.hardCap()).to.equal(ethers.utils.parseEther("1000"));
+      expect(await token.startTime()).to.be.above(Math.floor(Date.now() / 1000));
+      expect(await token.endTime()).to.be.above(await token.startTime());
+      expect(await token.active()).to.be.true;
+      expect(await token.owner()).to.equal(await ethers.provider.getSigner(0).getAddress());
     });
-    
-    await ethers.provider.send("evm_setNextBlockTimestamp", [await ico.endTime() + 1]);
-    
-    const balanceBefore = await owner.getBalance();
-    const amountToClaim = purchaseAmount.mul(1000).div(2); // Claim half of purchased tokens
-    
-    // Use the `connect()` method to create a new instance of the contract with the specified account as the signer
-    await expect(() => ico.connect(owner).claim())
-      .to.changeEtherBalance(owner, amountToClaim.div(1000));
-    
-    expect(await ico.balanceOf(owner.address)).to.equal(purchaseAmount.mul(1000).sub(amountToClaim));
-    expect(await owner.getBalance()).to.be.above(balanceBefore);
+  });
+
+  describe("Deposit", function () {
+    it("Should revert if ICO is not active", async function () {
+      await token.stopICO();
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("1") })).to.be.revertedWith("ICO not active");
     });
-    
-    it("should allow owner to withdraw after ICO ends and soft cap is reached", async function () {
-    const purchaseAmount = ethers.utils.parseEther("5");
-    await owner.sendTransaction({ to: ico.address, value: purchaseAmount });
-    
-    await ethers.provider.send("evm_setNextBlockTimestamp", [await ico.endTime() + 1]);
-    
-    const balanceBefore = await owner.getBalance();
-    
-    // Use the `connect()` method to create a new instance of the contract with the specified account as the signer
-    await expect(() => ico.connect(owner).withdraw())
-      .to.changeEtherBalance(owner, purchaseAmount);
-    
-    expect(await ico.active()).to.equal(false);
-    expect(await ico.balanceOf(owner.address)).to.equal(0);
-    expect(await owner.getBalance()).to.be.above(balanceBefore);
+
+    it("Should revert if the ICO has not started yet", async function () {
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("1") })).to.be.revertedWith("ICO has not started yet");
     });
-    
-    it("should not allow owner to withdraw after ICO ends and soft cap is not reached", async function () {
-    await ethers.provider.send("evm_setNextBlockTimestamp", [await ico.endTime() + 1]);
-    await expect(ico.withdraw()).to.be.revertedWith("Soft cap not reached");
+
+    it("Should revert if the ICO has ended", async function () {
+      // Increase time to after the end of the ICO
+      await ethers.provider.send("evm_increaseTime", [3600]);
+      await ethers.provider.send("evm_mine");
+
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("1") })).to.be.revertedWith("ICO has ended");
     });
+
+    it("Should revert if the amount is below the minimum purchase limit", async function () {
+      await ethers.provider.send("evm_increaseTime", [120]);
+      await ethers.provider.send("evm_mine");
+
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("0.00005") })).to.be.revertedWith("Amount is below minimum purchase limit");
     });
+
+    it("Should revert if the amount is above the maximum purchase limit", async function () {
+      await expect(token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("0.00005") })).to.be.revertedWith("Amount is above maximum purchase limit");
+    });
+
+    it("Should mint tokens to the sender if all conditions are met", async function () {
+      const initialBalance = await token.balanceOf(await ethers.provider.getSigner(1).getAddress());
+
+      await token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("1") });
+      const finalBalance = await token.balanceOf(await ethers.provider.getSigner(1).getAddress());
+
+      expect(finalBalance.sub(initialBalance)).to.equal(ethers.utils.parseEther("100"));
+    });
+  });
+
+  describe("Stop ICO", function () {
+    it("Should revert if called by a non-owner", async function () {
+      await expect(token.connect(ethers.provider.getSigner(1)).stopICO()).to.be.revertedWith("Ownable: caller is not the owner");
+    });
+
+    it("Should set active to false", async function () {
+      await token.stopICO();
+      expect(await token.active()).to.be.false;
+    });
+  });
+
+  describe("Withdraw", function () {
+    beforeEach(async function () {  await token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("2") }); // 200 tokens
+    await token.connect(ethers.provider.getSigner(2)).deposit({ value: ethers.utils.parseEther("3") }); // 300 tokens
+  });
+  
+  it("Should revert if called while ICO is active", async function () {
+    await expect(token.withdraw()).to.be.revertedWith("Cannot withdraw while ICO is active");
+  });
+  
+  it("Should revert if the soft cap has not been reached", async function () {
+    await token.stopICO();
+    await expect(token.withdraw()).to.be.revertedWith("Soft cap not reached");
+  });
+  
+  it("Should transfer the contract balance to the owner upon successful withdrawal", async function () {
+    const initialBalance = await ethers.provider.getBalance(await ethers.provider.getSigner(0).getAddress());
+  
+    // Increase time to after the end of the ICO
+    await ethers.provider.send("evm_setNextBlockTimestamp", [await token.endTime() + 1]);
+  
+    await token.withdraw();
+  
+    const finalBalance = await ethers.provider.getBalance(await ethers.provider.getSigner(0).getAddress());
+    expect(finalBalance.sub(initialBalance)).to.equal(ethers.utils.parseEther("5")); // Total deposited: 2 + 3 = 5
+  });
+  });
+  
+  describe("Claim", function () {
+  beforeEach(async function () {
+  await token.connect(ethers.provider.getSigner(1)).deposit({ value: ethers.utils.parseEther("1") }); // 100 tokens
+  
+    await token.stopICO();
+  
+    // Increase time to after the end of the ICO
+    await ethers.provider.send("evm_setNextBlockTimestamp", [await token.endTime() + 1]);
+  });
+  
+  it("Should revert if called while ICO is active", async function () {
+    await expect(token.connect(ethers.provider.getSigner(1)).claim()).to.be.revertedWith("Cannot claim while ICO is active");
+  });
+  
+  it("Should revert if the soft cap has not been reached", async function () {
+    await token.withdraw(); // Withdraw all funds, so the soft cap is not reached anymore
+    await expect(token.connect(ethers.provider.getSigner(1)).claim()).to.be.revertedWith("Soft cap not reached");
+  });
+  
+  it("Should revert if user has no tokens to claim", async function () {
+    await expect(token.connect(ethers.provider.getSigner(2)).claim()).to.be.revertedWith("No tokens to claim");
+  });
+  
+  it("Should burn the user's tokens and transfer ether to the user upon successful claiming", async function () {
+    const initialBalance = await ethers.provider.getBalance(await ethers.provider.getSigner(1).getAddress());
+    const initialTokens = await token.balanceOf(await ethers.provider.getSigner(1).getAddress());
+  
+    await token.connect(ethers.provider.getSigner(1)).claim();
+  
+    const finalBalance = await ethers.provider.getBalance(await ethers.provider.getSigner(1).getAddress());
+    const finalTokens = await token.balanceOf(await ethers.provider.getSigner(1).getAddress());
+  
+    expect(finalTokens).to.equal(0);
+    expect(finalBalance.sub(initialBalance)).to.equal(ethers.utils.parseEther("1"));
+  });
+  });
+  });
