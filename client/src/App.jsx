@@ -13,43 +13,38 @@ function App() {
 	const [amount, setAmount] = useState(0);
 	const [account, setAccount] = useState("");
 	const [icoState, setIcoState] = useState("");
+	const [startTime, setStartTime] = useState(0);
+	const [endTime, setEndTime] = useState(0);
+	const [depositAmount, setDepositAmount] = useState(0);
+	const [softCap, setSoftCap] = useState(0);
+	const [hardCap, setHardCap] = useState(0);
 
-	const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+	const contractAddress = "0x064d422Cc0857903c6d5C631793803A41BD89E41";
 	const abi = ICO.abi;
 
-	const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
+	const web3 = new Web3(
+		Web3.givenProvider || "https://data-seed-prebsc-1-s1.binance.org:8545"
+	);
 
 	// Create an instance of the contract
 	const contract = new web3.eth.Contract(abi, contractAddress);
 
 	const updateBalance = async account => {
 		const balance = await contract.methods.balanceOf(account).call();
+		console.log("Balance: ", balance);
 		setBalance(balance);
 	};
 
-	const getStartDate = async () => {
-		const _startDate = await contract.methods
-			.getICODate()
-			.send({ from: window.ethereum.selectedAddress });
-		console.log("startdate: ", _startDate);
-		return startDate;
+	const fetchTime = async () => {
+		const startTime = await contract.methods.startTime().call();
+		setStartTime(startTime * 1000);
+		const endTime = await contract.methods.endTime().call();
+		setEndTime(endTime * 1000);
 	};
 
-	const startDate = getStartDate();
-
-	// useEffect(() => {
-	// 	const getICOStat = async () => {
-	// 		try {
-	// 			const stat = await contract.methods
-	// 				.getICOState()
-	// 				.send({ from: window.ethereum.selectedAddress });
-	// 			console.log("icostat: ", stat);
-	// 		} catch (error) {
-	// 			console.log(error);
-	// 		}
-	// 	};
-	// 	getICOStat();
-	// }, []);
+	useEffect(() => {
+		fetchTime();
+	}, []);
 
 	return (
 		<GlobalContext.Provider
@@ -63,7 +58,14 @@ function App() {
 				updateBalance,
 				account,
 				setAccount,
-				startDate
+				startTime,
+				endTime,
+				depositAmount,
+				setDepositAmount,
+				softCap,
+				setSoftCap,
+				hardCap,
+				setHardCap
 			}}
 		>
 			<Layout>

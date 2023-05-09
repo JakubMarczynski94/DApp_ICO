@@ -1,9 +1,12 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import GlobalContext from "../../context/GlobalContext";
 import { Progress, Row, Col, Typography } from "antd";
 const { Title, Paragraph } = Typography;
 
-const CountdownTimer = ({ startTime, endTime }) => {
+const CountdownTimer = () => {
+	const { startTime, endTime } = useContext(GlobalContext);
+
 	const [remainingTime, setRemainingTime] = useState(null);
 
 	useEffect(() => {
@@ -43,7 +46,9 @@ const CountdownTimer = ({ startTime, endTime }) => {
 						<Typography>
 							<Title level={4}>Start Time</Title>
 							<Paragraph>
-								Tuesday, 9 May 2023 00:00:00 GMT+00:00
+								{`${new Date(
+									parseInt(startTime)
+								).toUTCString()}`}
 							</Paragraph>
 						</Typography>
 					</Col>
@@ -52,7 +57,7 @@ const CountdownTimer = ({ startTime, endTime }) => {
 					<Col>
 						<Title level={4}>End Time</Title>
 						<Paragraph>
-							Thursday, 10 May 2023 00:00:00 GMT+00:00
+							{new Date(parseInt(endTime)).toUTCString()}
 						</Paragraph>
 					</Col>
 				</Row>
@@ -62,7 +67,7 @@ const CountdownTimer = ({ startTime, endTime }) => {
 				<Progress
 					type="circle"
 					status="active"
-					percent={90}
+					percent={100 - progressBarValue}
 					strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
 				/>
 			</Col>

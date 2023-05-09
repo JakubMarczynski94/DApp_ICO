@@ -19,12 +19,14 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
       accounts: {
-        mnemonic: "test test test test test test test test test test test junk"
-      }
+        mnemonic: "test test test test test test test test test test test junk",
+      },
     },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-      accounts: ["f8d72dad574f7944d3f397371ff039613149d2d87746ec311bc262015c79a869"]
-    }
-  }
+      accounts: [
+        "f32fa37c9c12287694c0b955ce898644a152be2eca5ba226bce189e54177080f",
+      ],
+    },
+  },
 };

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -49,7 +48,6 @@ contract ICO is ERC20, Ownable {
     function deposit() external payable {
         require(ICOState == State.RUNNING, "ICO not active");
         require(block.timestamp >= startTime, "ICO has not started yet");
-        require(block.timestamp <= endTime, "ICO has ended");
 
         uint256 amount = msg.value * rate;
         require(amount >= minPurchase, "Amount is below minimum purchase limit");

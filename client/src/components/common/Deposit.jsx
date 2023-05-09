@@ -1,9 +1,15 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Input, Button, Row, Col, Statistic, Card, message } from "antd";
 import GlobalContext from "../../context/GlobalContext";
 
 const MyComponent = () => {
-	const { web3, contract, updateBalance } = useContext(GlobalContext);
+	const {
+		web3,
+		contract,
+		updateBalance,
+		depositAmount,
+		setDepositAmount
+	} = useContext(GlobalContext);
 
 	const [value, setValue] = useState("");
 	const [messageApi, contextHolder] = message.useMessage();
@@ -12,6 +18,15 @@ const MyComponent = () => {
 		const inputValue = e.target.value;
 		setValue(inputValue);
 	};
+
+	const fetchdepositAmount = async () => {
+		const depositAmount = await contract.methods.depositAmount().call();
+		setDepositAmount(depositAmount);
+	};
+
+	useEffect(() => {
+		fetchdepositAmount();
+	}, []);
 
 	const handleSubmit = async e => {
 		e.preventDefault();
@@ -31,6 +46,7 @@ const MyComponent = () => {
 					content: "Deposit success"
 				});
 				updateBalance(window.ethereum.selectedAddress);
+				fetchdepositAmount();
 			} catch (error) {
 				console.log(error);
 				messageApi.open({
@@ -49,10 +65,10 @@ const MyComponent = () => {
 					<Card bordered={false}>
 						<Statistic
 							title="Total Deposit"
-							value={56}
+							value={depositAmount}
 							precision={2}
 							valueStyle={{ color: "#3f8600" }}
-							prefix="$"
+							prefix="MTH"
 						/>
 					</Card>
 					<form

@@ -8,11 +8,6 @@ import CountdownTimer from "../common/CountdownTimer";
 import GlobalContext from "../../context/GlobalContext";
 
 const AppHero = () => {
-	const { startDate } = useContext(GlobalContext);
-
-	const [startTime] = useState(new Date(startDate));
-	const [endTime] = useState(new Date("May 8, 2023 11:30:00"));
-
 	return (
 		<>
 			<Clock />
@@ -21,7 +16,7 @@ const AppHero = () => {
 			<Divider />
 			<CapStat />
 			<Divider />
-			<CountdownTimer startTime={startTime} endTime={endTime} />
+			<CountdownTimer />
 		</>
 	);
 };
