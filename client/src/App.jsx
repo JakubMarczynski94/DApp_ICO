@@ -11,10 +11,10 @@ import AppHome from "./views/Home";
 function App() {
 	const [balance, setBalance] = useState(0);
 	const [amount, setAmount] = useState(0);
-	const [status, setStatus] = useState("");
 	const [account, setAccount] = useState("");
+	const [icoState, setIcoState] = useState("");
 
-	const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+	const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 	const abi = ICO.abi;
 
 	const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
@@ -27,6 +27,30 @@ function App() {
 		setBalance(balance);
 	};
 
+	const getStartDate = async () => {
+		const _startDate = await contract.methods
+			.getICODate()
+			.send({ from: window.ethereum.selectedAddress });
+		console.log("startdate: ", _startDate);
+		return startDate;
+	};
+
+	const startDate = getStartDate();
+
+	// useEffect(() => {
+	// 	const getICOStat = async () => {
+	// 		try {
+	// 			const stat = await contract.methods
+	// 				.getICOState()
+	// 				.send({ from: window.ethereum.selectedAddress });
+	// 			console.log("icostat: ", stat);
+	// 		} catch (error) {
+	// 			console.log(error);
+	// 		}
+	// 	};
+	// 	getICOStat();
+	// }, []);
+
 	return (
 		<GlobalContext.Provider
 			value={{
@@ -35,12 +59,11 @@ function App() {
 				setBalance,
 				amount,
 				setAmount,
-				status,
-				setStatus,
 				contract,
 				updateBalance,
 				account,
-				setAccount
+				setAccount,
+				startDate
 			}}
 		>
 			<Layout>

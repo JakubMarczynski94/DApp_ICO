@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Divider } from "antd";
 
 import Clock from "../common/Clock";
 import Deposit from "../common/Deposit";
 import CapStat from "../common/CapStat";
 import CountdownTimer from "../common/CountdownTimer";
+import GlobalContext from "../../context/GlobalContext";
 
-const AppHero: React.FC = () => {
-	const [startTime] = useState<Date>(new Date("May 8, 2023 10:00:00"));
-	const [endTime] = useState<Date>(new Date("May 8, 2023 11:30:00"));
+const AppHero = () => {
+	const { startDate } = useContext(GlobalContext);
+
+	const [startTime] = useState(new Date(startDate));
+	const [endTime] = useState(new Date("May 8, 2023 11:30:00"));
 
 	return (
 		<>
