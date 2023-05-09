@@ -19,12 +19,10 @@ function App() {
 	const [softCap, setSoftCap] = useState(0);
 	const [hardCap, setHardCap] = useState(0);
 
-	const contractAddress = "0x064d422Cc0857903c6d5C631793803A41BD89E41";
+	const contractAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 	const abi = ICO.abi;
 
-	const web3 = new Web3(
-		Web3.givenProvider || "https://data-seed-prebsc-1-s1.binance.org:8545"
-	);
+	const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 
 	// Create an instance of the contract
 	const contract = new web3.eth.Contract(abi, contractAddress);

@@ -57,6 +57,44 @@ const MyComponent = () => {
 		}
 	};
 
+	const handle_withDraw = async () => {
+		try {
+			await contract.methods.withdraw().send({
+				from: window.ethereum.selectedAddress
+			});
+			messageApi.open({
+				type: "success",
+				content: "withDraw success"
+			});
+			updateBalance(window.ethereum.selectedAddress);
+		} catch (error) {
+			console.log(error);
+			messageApi.open({
+				type: "error",
+				content: "withDraw failed"
+			});
+		}
+	};
+
+	const handle_claim = async () => {
+		try {
+			await contract.methods.claim().send({
+				from: window.ethereum.selectedAddress
+			});
+			messageApi.open({
+				type: "success",
+				content: "Claim success"
+			});
+			updateBalance(window.ethereum.selectedAddress);
+		} catch (error) {
+			console.log(error);
+			messageApi.open({
+				type: "error",
+				content: "Claim failed"
+			});
+		}
+	};
+
 	return (
 		<>
 			{contextHolder}
@@ -83,6 +121,12 @@ const MyComponent = () => {
 						/>
 						<Button type="primary" htmlType="submit">
 							Deposit
+						</Button>
+						<Button type="primary" danger onClick={handle_withDraw}>
+							WithDraw
+						</Button>
+						<Button type="default" onClick={handle_claim}>
+							Claim
 						</Button>
 					</form>
 				</Col>

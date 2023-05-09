@@ -3,12 +3,12 @@ const hre = require("hardhat");
 async function main() {
   const name = "My Token";
   const symbol = "MTK";
-  const minPurchase = hre.ethers.utils.parseEther("0.1");
-  const maxPurchase = hre.ethers.utils.parseEther("10");
+  const minPurchase = hre.ethers.utils.parseEther("0.01");
+  const maxPurchase = hre.ethers.utils.parseEther("0.05");
   const rate = 1000;
-  const softCap = hre.ethers.utils.parseEther("1000");
-  const hardCap = hre.ethers.utils.parseEther("10000");
-  const startTime = Math.floor(Date.now() / 1000); // Start
+  const softCap = hre.ethers.utils.parseEther("0.1");
+  const hardCap = hre.ethers.utils.parseEther("1");
+  const startTime = Math.floor(Date.now() / 1000); // Start in 1 minute
   const endTime = Math.floor(Date.now() / 1000) + 86400; // End in 1 day
 
   const ICO = await hre.ethers.getContractFactory("ICO");
