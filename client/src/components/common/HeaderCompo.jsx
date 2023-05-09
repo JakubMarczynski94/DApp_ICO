@@ -1,15 +1,38 @@
 import React, { useContext } from "react";
 import { Layout, Avatar, Button } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import Web3 from "web3";
 
 import GlobalContext from "../../context/GlobalContext";
 
 const { Header } = Layout;
 
 const MyHeader = () => {
-	const { provider, account, handleConnectWallet } = useContext(
+	const { web3, account, setAccount, updateBalance } = useContext(
 		GlobalContext
 	);
+
+	const handleConnectWallet = async () => {
+		try {
+			// Get the user's account address from MetaMask
+			const accounts = await window.ethereum.request({
+				method: "eth_requestAccounts"
+			});
+			const account = accounts[0];
+			setAccount(account);
+
+			// Call the updateBalance function to get the initial token balance
+			await updateBalance(account);
+
+			// Set up event listener for account change using the on() method
+			window.ethereum.on("accountsChanged", accounts => {
+				const account = accounts[0];
+				updateBalance(account);
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	return (
 		<Header
@@ -32,16 +55,16 @@ const MyHeader = () => {
 				/>
 				<span>My App</span>
 			</div>
-			{provider && account ? (
-				`${account.address.substring(
-					0,
-					6
-				)}......${account.address.substring(36, 42)}`
+			{account ? (
+				// `${account.address.substring(
+				// 	0,
+				// 	6
+				// )}......${account.address.substring(36, 42)}`
+				<Button type="primary" onClick={() => alert("disconnect")}>
+					Disconnect
+				</Button>
 			) : (
-				<Button
-					type="primary"
-					onClick={!provider ? handleConnectWallet : null}
-				>
+				<Button type="primary" onClick={handleConnectWallet}>
 					Connect
 				</Button>
 			)}

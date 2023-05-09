@@ -1,77 +1,85 @@
 import { ethers } from "ethers";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import Web3 from "web3";
 
-const providerOptions = {
-	walletconnect: {
-		package: WalletConnectProvider,
-		options: {
-			infuraId: process.env.REACT_APP_INFURA_ID
-		},
-		opera: {
-			package: true
-		}
-	}
-};
+// const providerOptions = {
+// 	walletconnect: {
+// 		package: WalletConnectProvider,
+// 		options: {
+// 			infuraId: process.env.REACT_APP_INFURA_ID
+// 		},
+// 		opera: {
+// 			package: true
+// 		}
+// 	}
+// };
 
-async function connectWallet(handleConnectWallet) {
+async function connectWallet() {
+	const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
+	return web3;
+
 	//Infura ID Check
 	// if (!process.env.REACT_APP_INFURA_ID) {
 	// 	console.log("Missing Infura Id");
 	// 	return;
 	// }
-	try {
-		// Web3Modal
-		const web3modal = new Web3Modal({
-			cacheProvider: true,
-			providerOptions,
-			theme: {
-				background: "#00256C",
-				main: "#FFF",
-				secondary: "#FFF",
-				border: "#00256C",
-				hover: "#00259F"
-			}
-		});
+	// try {
+	// 	// Web3Modal
+	// 	const web3modal = new Web3Modal({
+	// 		cacheProvider: true,
+	// 		providerOptions,
+	// 		theme: {
+	// 			background: "#00256C",
+	// 			main: "#FFF",
+	// 			secondary: "#FFF",
+	// 			border: "#00256C",
+	// 			hover: "#00259F"
+	// 		}
+	// 	});
 
-		const web3modalInstance = await web3modal.connect();
+	// 	const web3modalInstance = await web3modal.connect();
 
-		//Provider and Signer
-		const _provider = new ethers.providers.Web3Provider(web3modalInstance);
-		const _signer = _provider.getSigner();
+	// 	//Provider and Signer
+	// 	const _provider = new ethers.providers.Web3Provider(web3modalInstance);
+	// 	const _signer = _provider.getSigner();
 
-		//Account
-		let _address = await _provider.getSigner().getAddress();
-		let _balance = ethers.utils.formatEther(
-			await _provider.getSigner().getBalance()
-		);
-		const { chainId } = await _provider.getNetwork();
-		const _chainId = chainId;
+	// 	//Account
+	// 	let _address = await _provider.getSigner().getAddress();
+	// 	let _balance = ethers.utils.formatEther(
+	// 		await _provider.getSigner().getBalance()
+	// 	);
+	// 	const { chainId } = await _provider.getNetwork();
+	// 	const _chainId = chainId;
 
-		//Events
-		_provider.provider.on("accountsChanged", accounts => {
-			handleConnectWallet();
-		});
+	// 	//Events
 
-		_provider.provider.on("chainChanged", chainId => {
-			handleConnectWallet();
-		});
+	// 	_provider.provider.on("accountsChanged", accounts => {
+	// 		handleConnectWallet();
+	// 	});
 
-		// Subscribe to provider disconnection
-		_provider.provider.on("disconnect", async error => {
-			await web3modal.clearCachedProvider();
-		});
+	// 	_provider.provider.on("chainChanged", chainId => {
+	// 		handleConnectWallet();
+	// 	});
 
-		return {
-			_provider,
-			_signer,
-			_address,
-			_balance,
-			_chainId
-		};
-	} catch (error) {
-		console.log(error);
-	}
+	// 	// Subscribe to provider disconnection
+	// 	_provider.provider.on("disconnect", async error => {
+	// 		await web3modal.clearCachedProvider();
+	// 		await window.localStorage.clear();
+	// 	});
+
+	// 	console.log("connected");
+
+	// 	return {
+	// 		_provider,
+	// 		_signer,
+	// 		_address,
+	// 		_balance,
+	// 		_chainId
+	// 	};
+	// } catch (error) {
+	// 	console.log(error);
+	// }
 }
 
 export default connectWallet;
